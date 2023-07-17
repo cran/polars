@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Polars - User Guide for R</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Polars - User Guide for R</h1>
+
+
+
+<p><a href="https://pola-rs.github.io/polars-book/user-guide/">The
+Polars User Guide</a> is a detailed tutorial about the Polars DataFrame
+library. Its goal is to introduce you to Polars by going through
+examples and comparing it to other solutions. Some design choices are
+introduced there. The guide also introduces you to optimal usage of
+Polars. The Polars User Guide is available at this link:</p>
+<p><a href="https://pola-rs.github.io/polars-book/user-guide/" class="uri">https://pola-rs.github.io/polars-book/user-guide/</a></p>
+<p>Currently, the User Guide includes code examples in Python and Rust.
+This page complements the guide with examples in R. The R examples are
+not complete yet; when they are complete, our goal is to merge them into
+the main User Guide. If you want to help, please submit a pull request
+to the <a href="https://github.com/pola-rs/r-polars">R polars Github
+repository.</a></p>
+<p>The current page works as a reference document, for side-by-side
+comparisons with the Python and Rust examples in the main User
+Guide.</p>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(polars)</span></code></pre></div>
+</div>
+<div id="getting-started" class="section level1">
+<h1>Getting started</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">read_csv</span>(<span class="st">&quot;https://j.mp/iriscsv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;sepal_length&quot;</span>) <span class="sc">&gt;</span> <span class="dv">5</span>)<span class="sc">$</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;species&quot;</span>, <span class="at">maintain_order =</span> <span class="cn">TRUE</span>)<span class="sc">$</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">agg</span>(pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">sum</span>())</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; shape: (3, 5)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; ┌────────────┬──────────────┬─────────────┬──────────────┬─────────────┐</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; │ species    ┆ sepal_length ┆ sepal_width ┆ petal_length ┆ petal_width │</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; │ ---        ┆ ---          ┆ ---         ┆ ---          ┆ ---         │</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; │ str        ┆ f64          ┆ f64         ┆ f64          ┆ f64         │</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; ╞════════════╪══════════════╪═════════════╪══════════════╪═════════════╡</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; │ setosa     ┆ 116.9        ┆ 81.7        ┆ 33.2         ┆ 6.1         │</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; │ versicolor ┆ 281.9        ┆ 131.8       ┆ 202.9        ┆ 63.3        │</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; │ virginica  ┆ 324.5        ┆ 146.2       ┆ 273.1        ┆ 99.6        │</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; └────────────┴──────────────┴─────────────┴──────────────┴─────────────┘</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="fu">lazy</span>()<span class="sc">$</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>  <span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;sepal_length&quot;</span>) <span class="sc">&gt;</span> <span class="dv">5</span>)<span class="sc">$</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;species&quot;</span>, <span class="at">maintain_order =</span> <span class="cn">TRUE</span>)<span class="sc">$</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="fu">agg</span>(pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">sum</span>())<span class="sc">$</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; shape: (3, 5)</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; ┌────────────┬──────────────┬─────────────┬──────────────┬─────────────┐</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; │ species    ┆ sepal_length ┆ sepal_width ┆ petal_length ┆ petal_width │</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; │ ---        ┆ ---          ┆ ---         ┆ ---          ┆ ---         │</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; │ str        ┆ f64          ┆ f64         ┆ f64          ┆ f64         │</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; ╞════════════╪══════════════╪═════════════╪══════════════╪═════════════╡</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; │ setosa     ┆ 116.9        ┆ 81.7        ┆ 33.2         ┆ 6.1         │</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; │ versicolor ┆ 281.9        ┆ 131.8       ┆ 202.9        ┆ 63.3        │</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; │ virginica  ┆ 324.5        ┆ 146.2       ┆ 273.1        ┆ 99.6        │</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; └────────────┴──────────────┴─────────────┴──────────────┴─────────────┘</span></span></code></pre></div>
+</div>
+<div id="polars-quick-exploration-guide" class="section level1">
+<h1>Polars quick exploration guide</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>series <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">Series</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>series</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; polars Series: shape: (5,)</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; Series: &#39;&#39; [f64]</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;  1.0</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;  2.0</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;  3.0</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;  4.0</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;  5.0</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; ]</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="st">&quot;integer&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="st">&quot;date&quot;</span> <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">&quot;2022-1-1&quot;</span>, <span class="st">&quot;2022-1-2&quot;</span>, <span class="st">&quot;2022-1-3&quot;</span>)),</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="st">&quot;float&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">4.0</span>, <span class="fl">5.0</span>, <span class="fl">6.0</span>))</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>df</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; shape: (3, 3)</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; ┌─────────┬────────────┬───────┐</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; │ integer ┆ date       ┆ float │</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; │ ---     ┆ ---        ┆ ---   │</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; │ f64     ┆ date       ┆ f64   │</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; ╞═════════╪════════════╪═══════╡</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; │ 1.0     ┆ 2022-01-01 ┆ 4.0   │</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; │ 2.0     ┆ 2022-01-02 ┆ 5.0   │</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; │ 3.0     ┆ 2022-01-03 ┆ 6.0   │</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; └─────────┴────────────┴───────┘</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co"># df$write_csv(&#39;output.csv&#39;)</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co"># df_csv_with_dates = pl$read_csv(&quot;output.csv&quot;, parse_dates=True)</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co"># print(df_csv_with_dates)</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co"># dataframe$write_json(&#39;output.json&#39;)</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co"># df_json = pl$read_json(&quot;output.json&quot;)</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co"># print(df_json)</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a><span class="co"># dataframe$write_parquet(&#39;output.parquet&#39;)</span></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="co"># df_parquet = pl$read_parquet(&quot;output.parquet&quot;)</span></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a><span class="co"># print(df_parquet)</span></span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(</span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>  <span class="st">&quot;a&quot;</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">7</span>),</span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>  <span class="st">&quot;b&quot;</span> <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">8</span>),</span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>  <span class="st">&quot;c&quot;</span> <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">sprintf</span>(<span class="st">&quot;2022-12-%s&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)),</span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a>  <span class="st">&quot;d&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">2.0</span>, <span class="cn">NaN</span>, <span class="cn">NaN</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">42</span>, <span class="cn">NA</span>)</span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>)</span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">head</span>(<span class="dv">5</span>)</span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬─────┐</span></span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d   │</span></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ --- │</span></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64 │</span></span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═════╡</span></span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  ┆ 2022-12-01 ┆ 1.0 │</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 ┆ 2022-12-02 ┆ 2.0 │</span></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 ┆ 2022-12-03 ┆ NaN │</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2022-12-04 ┆ NaN │</span></span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 2022-12-05 ┆ 0.0 │</span></span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴─────┘</span></span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">tail</span>(<span class="dv">5</span>)</span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬───────┐</span></span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d     │</span></span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ ---   │</span></span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64   │</span></span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═══════╡</span></span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2022-12-04 ┆ NaN   │</span></span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 2022-12-05 ┆ 0.0   │</span></span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 ┆ 2022-12-06 ┆ -5.0  │</span></span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 ┆ 2022-12-07 ┆ -42.0 │</span></span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 ┆ 2022-12-08 ┆ null  │</span></span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴───────┘</span></span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a></span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a><span class="do">## not implemented yet</span></span>
+<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a><span class="co"># df$sample(3)</span></span>
+<span id="cb4-77"><a href="#cb4-77" tabindex="-1"></a></span>
+<span id="cb4-78"><a href="#cb4-78" tabindex="-1"></a><span class="do">## not implemented yet</span></span>
+<span id="cb4-79"><a href="#cb4-79" tabindex="-1"></a><span class="co"># df$describe()</span></span>
+<span id="cb4-80"><a href="#cb4-80" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;*&quot;</span>))</span>
+<span id="cb4-82"><a href="#cb4-82" tabindex="-1"></a><span class="co">#&gt; shape: (8, 4)</span></span>
+<span id="cb4-83"><a href="#cb4-83" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬───────┐</span></span>
+<span id="cb4-84"><a href="#cb4-84" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d     │</span></span>
+<span id="cb4-85"><a href="#cb4-85" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ ---   │</span></span>
+<span id="cb4-86"><a href="#cb4-86" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64   │</span></span>
+<span id="cb4-87"><a href="#cb4-87" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═══════╡</span></span>
+<span id="cb4-88"><a href="#cb4-88" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  ┆ 2022-12-01 ┆ 1.0   │</span></span>
+<span id="cb4-89"><a href="#cb4-89" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 ┆ 2022-12-02 ┆ 2.0   │</span></span>
+<span id="cb4-90"><a href="#cb4-90" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 ┆ 2022-12-03 ┆ NaN   │</span></span>
+<span id="cb4-91"><a href="#cb4-91" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2022-12-04 ┆ NaN   │</span></span>
+<span id="cb4-92"><a href="#cb4-92" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 2022-12-05 ┆ 0.0   │</span></span>
+<span id="cb4-93"><a href="#cb4-93" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 ┆ 2022-12-06 ┆ -5.0  │</span></span>
+<span id="cb4-94"><a href="#cb4-94" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 ┆ 2022-12-07 ┆ -42.0 │</span></span>
+<span id="cb4-95"><a href="#cb4-95" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 ┆ 2022-12-08 ┆ null  │</span></span>
+<span id="cb4-96"><a href="#cb4-96" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴───────┘</span></span>
+<span id="cb4-97"><a href="#cb4-97" tabindex="-1"></a></span>
+<span id="cb4-98"><a href="#cb4-98" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)))</span>
+<span id="cb4-99"><a href="#cb4-99" tabindex="-1"></a><span class="co">#&gt; shape: (8, 2)</span></span>
+<span id="cb4-100"><a href="#cb4-100" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┐</span></span>
+<span id="cb4-101"><a href="#cb4-101" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        │</span></span>
+<span id="cb4-102"><a href="#cb4-102" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      │</span></span>
+<span id="cb4-103"><a href="#cb4-103" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      │</span></span>
+<span id="cb4-104"><a href="#cb4-104" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╡</span></span>
+<span id="cb4-105"><a href="#cb4-105" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  │</span></span>
+<span id="cb4-106"><a href="#cb4-106" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 │</span></span>
+<span id="cb4-107"><a href="#cb4-107" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 │</span></span>
+<span id="cb4-108"><a href="#cb4-108" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 │</span></span>
+<span id="cb4-109"><a href="#cb4-109" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 │</span></span>
+<span id="cb4-110"><a href="#cb4-110" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 │</span></span>
+<span id="cb4-111"><a href="#cb4-111" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 │</span></span>
+<span id="cb4-112"><a href="#cb4-112" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 │</span></span>
+<span id="cb4-113"><a href="#cb4-113" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┘</span></span>
+<span id="cb4-114"><a href="#cb4-114" tabindex="-1"></a></span>
+<span id="cb4-115"><a href="#cb4-115" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>)))</span>
+<span id="cb4-116"><a href="#cb4-116" tabindex="-1"></a><span class="co">#&gt; shape: (8, 2)</span></span>
+<span id="cb4-117"><a href="#cb4-117" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┐</span></span>
+<span id="cb4-118"><a href="#cb4-118" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        │</span></span>
+<span id="cb4-119"><a href="#cb4-119" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      │</span></span>
+<span id="cb4-120"><a href="#cb4-120" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      │</span></span>
+<span id="cb4-121"><a href="#cb4-121" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╡</span></span>
+<span id="cb4-122"><a href="#cb4-122" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  │</span></span>
+<span id="cb4-123"><a href="#cb4-123" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 │</span></span>
+<span id="cb4-124"><a href="#cb4-124" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 │</span></span>
+<span id="cb4-125"><a href="#cb4-125" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 │</span></span>
+<span id="cb4-126"><a href="#cb4-126" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 │</span></span>
+<span id="cb4-127"><a href="#cb4-127" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 │</span></span>
+<span id="cb4-128"><a href="#cb4-128" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 │</span></span>
+<span id="cb4-129"><a href="#cb4-129" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 │</span></span>
+<span id="cb4-130"><a href="#cb4-130" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┘</span></span>
+<span id="cb4-131"><a href="#cb4-131" tabindex="-1"></a></span>
+<span id="cb4-132"><a href="#cb4-132" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;a&quot;</span>), pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;b&quot;</span>))<span class="sc">$</span><span class="fu">limit</span>(<span class="dv">3</span>)</span>
+<span id="cb4-133"><a href="#cb4-133" tabindex="-1"></a><span class="co">#&gt; shape: (3, 2)</span></span>
+<span id="cb4-134"><a href="#cb4-134" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┐</span></span>
+<span id="cb4-135"><a href="#cb4-135" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        │</span></span>
+<span id="cb4-136"><a href="#cb4-136" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      │</span></span>
+<span id="cb4-137"><a href="#cb4-137" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      │</span></span>
+<span id="cb4-138"><a href="#cb4-138" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╡</span></span>
+<span id="cb4-139"><a href="#cb4-139" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  │</span></span>
+<span id="cb4-140"><a href="#cb4-140" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 │</span></span>
+<span id="cb4-141"><a href="#cb4-141" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 │</span></span>
+<span id="cb4-142"><a href="#cb4-142" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┘</span></span>
+<span id="cb4-143"><a href="#cb4-143" tabindex="-1"></a></span>
+<span id="cb4-144"><a href="#cb4-144" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">exclude</span>(<span class="st">&quot;a&quot;</span>))</span>
+<span id="cb4-145"><a href="#cb4-145" tabindex="-1"></a><span class="co">#&gt; shape: (8, 3)</span></span>
+<span id="cb4-146"><a href="#cb4-146" tabindex="-1"></a><span class="co">#&gt; ┌──────────┬────────────┬───────┐</span></span>
+<span id="cb4-147"><a href="#cb4-147" tabindex="-1"></a><span class="co">#&gt; │ b        ┆ c          ┆ d     │</span></span>
+<span id="cb4-148"><a href="#cb4-148" tabindex="-1"></a><span class="co">#&gt; │ ---      ┆ ---        ┆ ---   │</span></span>
+<span id="cb4-149"><a href="#cb4-149" tabindex="-1"></a><span class="co">#&gt; │ f64      ┆ date       ┆ f64   │</span></span>
+<span id="cb4-150"><a href="#cb4-150" tabindex="-1"></a><span class="co">#&gt; ╞══════════╪════════════╪═══════╡</span></span>
+<span id="cb4-151"><a href="#cb4-151" tabindex="-1"></a><span class="co">#&gt; │ 0.49615  ┆ 2022-12-01 ┆ 1.0   │</span></span>
+<span id="cb4-152"><a href="#cb4-152" tabindex="-1"></a><span class="co">#&gt; │ 0.043154 ┆ 2022-12-02 ┆ 2.0   │</span></span>
+<span id="cb4-153"><a href="#cb4-153" tabindex="-1"></a><span class="co">#&gt; │ 0.443701 ┆ 2022-12-03 ┆ NaN   │</span></span>
+<span id="cb4-154"><a href="#cb4-154" tabindex="-1"></a><span class="co">#&gt; │ 0.961554 ┆ 2022-12-04 ┆ NaN   │</span></span>
+<span id="cb4-155"><a href="#cb4-155" tabindex="-1"></a><span class="co">#&gt; │ 0.083202 ┆ 2022-12-05 ┆ 0.0   │</span></span>
+<span id="cb4-156"><a href="#cb4-156" tabindex="-1"></a><span class="co">#&gt; │ 0.361177 ┆ 2022-12-06 ┆ -5.0  │</span></span>
+<span id="cb4-157"><a href="#cb4-157" tabindex="-1"></a><span class="co">#&gt; │ 0.759084 ┆ 2022-12-07 ┆ -42.0 │</span></span>
+<span id="cb4-158"><a href="#cb4-158" tabindex="-1"></a><span class="co">#&gt; │ 0.246696 ┆ 2022-12-08 ┆ null  │</span></span>
+<span id="cb4-159"><a href="#cb4-159" tabindex="-1"></a><span class="co">#&gt; └──────────┴────────────┴───────┘</span></span>
+<span id="cb4-160"><a href="#cb4-160" tabindex="-1"></a></span>
+<span id="cb4-161"><a href="#cb4-161" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">filter</span>(</span>
+<span id="cb4-162"><a href="#cb4-162" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;c&quot;</span>)<span class="sc">$</span><span class="fu">is_between</span>(<span class="fu">as.Date</span>(<span class="st">&quot;2022-12-2&quot;</span>), <span class="fu">as.Date</span>(<span class="st">&quot;2022-12-8&quot;</span>))</span>
+<span id="cb4-163"><a href="#cb4-163" tabindex="-1"></a>)</span>
+<span id="cb4-164"><a href="#cb4-164" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb4-165"><a href="#cb4-165" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬───────┐</span></span>
+<span id="cb4-166"><a href="#cb4-166" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d     │</span></span>
+<span id="cb4-167"><a href="#cb4-167" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ ---   │</span></span>
+<span id="cb4-168"><a href="#cb4-168" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64   │</span></span>
+<span id="cb4-169"><a href="#cb4-169" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═══════╡</span></span>
+<span id="cb4-170"><a href="#cb4-170" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 ┆ 2022-12-03 ┆ NaN   │</span></span>
+<span id="cb4-171"><a href="#cb4-171" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2022-12-04 ┆ NaN   │</span></span>
+<span id="cb4-172"><a href="#cb4-172" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 2022-12-05 ┆ 0.0   │</span></span>
+<span id="cb4-173"><a href="#cb4-173" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 ┆ 2022-12-06 ┆ -5.0  │</span></span>
+<span id="cb4-174"><a href="#cb4-174" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 ┆ 2022-12-07 ┆ -42.0 │</span></span>
+<span id="cb4-175"><a href="#cb4-175" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴───────┘</span></span>
+<span id="cb4-176"><a href="#cb4-176" tabindex="-1"></a></span>
+<span id="cb4-177"><a href="#cb4-177" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">filter</span>((pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;a&quot;</span>) <span class="sc">&lt;=</span> <span class="dv">3</span>) <span class="sc">&amp;</span> (pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;d&quot;</span>)<span class="sc">$</span><span class="fu">is_not_nan</span>()))</span>
+<span id="cb4-178"><a href="#cb4-178" tabindex="-1"></a><span class="co">#&gt; shape: (2, 4)</span></span>
+<span id="cb4-179"><a href="#cb4-179" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬─────┐</span></span>
+<span id="cb4-180"><a href="#cb4-180" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d   │</span></span>
+<span id="cb4-181"><a href="#cb4-181" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ --- │</span></span>
+<span id="cb4-182"><a href="#cb4-182" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64 │</span></span>
+<span id="cb4-183"><a href="#cb4-183" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═════╡</span></span>
+<span id="cb4-184"><a href="#cb4-184" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  ┆ 2022-12-01 ┆ 1.0 │</span></span>
+<span id="cb4-185"><a href="#cb4-185" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 ┆ 2022-12-02 ┆ 2.0 │</span></span>
+<span id="cb4-186"><a href="#cb4-186" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴─────┘</span></span>
+<span id="cb4-187"><a href="#cb4-187" tabindex="-1"></a></span>
+<span id="cb4-188"><a href="#cb4-188" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">with_columns</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;b&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;e&quot;</span>), (pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;b&quot;</span>) <span class="sc">+</span> <span class="dv">42</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;b+42&quot;</span>))</span>
+<span id="cb4-189"><a href="#cb4-189" tabindex="-1"></a><span class="co">#&gt; shape: (8, 6)</span></span>
+<span id="cb4-190"><a href="#cb4-190" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬───────┬──────────┬───────────┐</span></span>
+<span id="cb4-191"><a href="#cb4-191" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d     ┆ e        ┆ b+42      │</span></span>
+<span id="cb4-192"><a href="#cb4-192" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ ---   ┆ ---      ┆ ---       │</span></span>
+<span id="cb4-193"><a href="#cb4-193" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ date       ┆ f64   ┆ f64      ┆ f64       │</span></span>
+<span id="cb4-194"><a href="#cb4-194" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═══════╪══════════╪═══════════╡</span></span>
+<span id="cb4-195"><a href="#cb4-195" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  ┆ 2022-12-01 ┆ 1.0   ┆ 3.394717 ┆ 42.49615  │</span></span>
+<span id="cb4-196"><a href="#cb4-196" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 ┆ 2022-12-02 ┆ 2.0   ┆ 3.394717 ┆ 42.043154 │</span></span>
+<span id="cb4-197"><a href="#cb4-197" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 ┆ 2022-12-03 ┆ NaN   ┆ 3.394717 ┆ 42.443701 │</span></span>
+<span id="cb4-198"><a href="#cb4-198" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2022-12-04 ┆ NaN   ┆ 3.394717 ┆ 42.961554 │</span></span>
+<span id="cb4-199"><a href="#cb4-199" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 2022-12-05 ┆ 0.0   ┆ 3.394717 ┆ 42.083202 │</span></span>
+<span id="cb4-200"><a href="#cb4-200" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 ┆ 2022-12-06 ┆ -5.0  ┆ 3.394717 ┆ 42.361177 │</span></span>
+<span id="cb4-201"><a href="#cb4-201" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 ┆ 2022-12-07 ┆ -42.0 ┆ 3.394717 ┆ 42.759084 │</span></span>
+<span id="cb4-202"><a href="#cb4-202" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 ┆ 2022-12-08 ┆ null  ┆ 3.394717 ┆ 42.246696 │</span></span>
+<span id="cb4-203"><a href="#cb4-203" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴───────┴──────────┴───────────┘</span></span>
+<span id="cb4-204"><a href="#cb4-204" tabindex="-1"></a></span>
+<span id="cb4-205"><a href="#cb4-205" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">with_columns</span>((pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;a&quot;</span>) <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;b&quot;</span>))<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;a * b&quot;</span>))<span class="sc">$</span><span class="fu">select</span>(pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">exclude</span>(<span class="fu">c</span>(<span class="st">&quot;c&quot;</span>, <span class="st">&quot;d&quot;</span>)))</span>
+<span id="cb4-206"><a href="#cb4-206" tabindex="-1"></a><span class="co">#&gt; shape: (8, 3)</span></span>
+<span id="cb4-207"><a href="#cb4-207" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬──────────┐</span></span>
+<span id="cb4-208"><a href="#cb4-208" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ a * b    │</span></span>
+<span id="cb4-209"><a href="#cb4-209" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---      │</span></span>
+<span id="cb4-210"><a href="#cb4-210" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64      ┆ f64      │</span></span>
+<span id="cb4-211"><a href="#cb4-211" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪══════════╡</span></span>
+<span id="cb4-212"><a href="#cb4-212" tabindex="-1"></a><span class="co">#&gt; │ 0.0 ┆ 0.49615  ┆ 0.0      │</span></span>
+<span id="cb4-213"><a href="#cb4-213" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 0.043154 ┆ 0.043154 │</span></span>
+<span id="cb4-214"><a href="#cb4-214" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 0.443701 ┆ 0.887402 │</span></span>
+<span id="cb4-215"><a href="#cb4-215" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 0.961554 ┆ 2.884661 │</span></span>
+<span id="cb4-216"><a href="#cb4-216" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 0.083202 ┆ 0.332808 │</span></span>
+<span id="cb4-217"><a href="#cb4-217" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 0.361177 ┆ 1.805886 │</span></span>
+<span id="cb4-218"><a href="#cb4-218" tabindex="-1"></a><span class="co">#&gt; │ 6.0 ┆ 0.759084 ┆ 4.554501 │</span></span>
+<span id="cb4-219"><a href="#cb4-219" tabindex="-1"></a><span class="co">#&gt; │ 7.0 ┆ 0.246696 ┆ 1.72687  │</span></span>
+<span id="cb4-220"><a href="#cb4-220" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴──────────┘</span></span>
+<span id="cb4-221"><a href="#cb4-221" tabindex="-1"></a></span>
+<span id="cb4-222"><a href="#cb4-222" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(<span class="st">&quot;x&quot;</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">7</span>, <span class="st">&quot;y&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;X&quot;</span>))</span>
+<span id="cb4-223"><a href="#cb4-223" tabindex="-1"></a></span>
+<span id="cb4-224"><a href="#cb4-224" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb4-225"><a href="#cb4-225" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;y&quot;</span>, <span class="at">maintain_order =</span> <span class="cn">FALSE</span>)<span class="sc">$</span></span>
+<span id="cb4-226"><a href="#cb4-226" tabindex="-1"></a>  <span class="fu">agg</span>(</span>
+<span id="cb4-227"><a href="#cb4-227" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;*&quot;</span>)<span class="sc">$</span><span class="fu">count</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;count&quot;</span>),</span>
+<span id="cb4-228"><a href="#cb4-228" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;*&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;sum&quot;</span>)</span>
+<span id="cb4-229"><a href="#cb4-229" tabindex="-1"></a>  )</span>
+<span id="cb4-230"><a href="#cb4-230" tabindex="-1"></a><span class="co">#&gt; shape: (4, 3)</span></span>
+<span id="cb4-231"><a href="#cb4-231" tabindex="-1"></a><span class="co">#&gt; ┌─────┬───────┬─────┐</span></span>
+<span id="cb4-232"><a href="#cb4-232" tabindex="-1"></a><span class="co">#&gt; │ y   ┆ count ┆ sum │</span></span>
+<span id="cb4-233"><a href="#cb4-233" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---   ┆ --- │</span></span>
+<span id="cb4-234"><a href="#cb4-234" tabindex="-1"></a><span class="co">#&gt; │ str ┆ u32   ┆ i32 │</span></span>
+<span id="cb4-235"><a href="#cb4-235" tabindex="-1"></a><span class="co">#&gt; ╞═════╪═══════╪═════╡</span></span>
+<span id="cb4-236"><a href="#cb4-236" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ 3     ┆ 3   │</span></span>
+<span id="cb4-237"><a href="#cb4-237" tabindex="-1"></a><span class="co">#&gt; │ X   ┆ 2     ┆ 13  │</span></span>
+<span id="cb4-238"><a href="#cb4-238" tabindex="-1"></a><span class="co">#&gt; │ C   ┆ 1     ┆ 5   │</span></span>
+<span id="cb4-239"><a href="#cb4-239" tabindex="-1"></a><span class="co">#&gt; │ B   ┆ 2     ┆ 7   │</span></span>
+<span id="cb4-240"><a href="#cb4-240" tabindex="-1"></a><span class="co">#&gt; └─────┴───────┴─────┘</span></span>
+<span id="cb4-241"><a href="#cb4-241" tabindex="-1"></a></span>
+<span id="cb4-242"><a href="#cb4-242" tabindex="-1"></a>df1 <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(</span>
+<span id="cb4-243"><a href="#cb4-243" tabindex="-1"></a>  <span class="st">&quot;a&quot;</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">7</span>,</span>
+<span id="cb4-244"><a href="#cb4-244" tabindex="-1"></a>  <span class="st">&quot;b&quot;</span> <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">8</span>),</span>
+<span id="cb4-245"><a href="#cb4-245" tabindex="-1"></a>  <span class="st">&quot;c&quot;</span> <span class="ot">=</span> <span class="fu">as.Date</span>(<span class="fu">sprintf</span>(<span class="st">&quot;2022-12-%s&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)),</span>
+<span id="cb4-246"><a href="#cb4-246" tabindex="-1"></a>  <span class="st">&quot;d&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">2.0</span>, <span class="cn">NaN</span>, <span class="cn">NaN</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">42</span>, <span class="cn">NA</span>)</span>
+<span id="cb4-247"><a href="#cb4-247" tabindex="-1"></a>)</span>
+<span id="cb4-248"><a href="#cb4-248" tabindex="-1"></a>df2 <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(<span class="st">&quot;x&quot;</span> <span class="ot">=</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">7</span>, <span class="st">&quot;y&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;X&quot;</span>))</span>
+<span id="cb4-249"><a href="#cb4-249" tabindex="-1"></a></span>
+<span id="cb4-250"><a href="#cb4-250" tabindex="-1"></a>pl<span class="sc">$</span><span class="fu">concat</span>(<span class="fu">c</span>(df1, df2), <span class="at">how =</span> <span class="st">&quot;horizontal&quot;</span>)</span>
+<span id="cb4-251"><a href="#cb4-251" tabindex="-1"></a><span class="co">#&gt; shape: (8, 6)</span></span>
+<span id="cb4-252"><a href="#cb4-252" tabindex="-1"></a><span class="co">#&gt; ┌─────┬──────────┬────────────┬───────┬─────┬─────┐</span></span>
+<span id="cb4-253"><a href="#cb4-253" tabindex="-1"></a><span class="co">#&gt; │ a   ┆ b        ┆ c          ┆ d     ┆ x   ┆ y   │</span></span>
+<span id="cb4-254"><a href="#cb4-254" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---      ┆ ---        ┆ ---   ┆ --- ┆ --- │</span></span>
+<span id="cb4-255"><a href="#cb4-255" tabindex="-1"></a><span class="co">#&gt; │ i32 ┆ f64      ┆ date       ┆ f64   ┆ i32 ┆ str │</span></span>
+<span id="cb4-256"><a href="#cb4-256" tabindex="-1"></a><span class="co">#&gt; ╞═════╪══════════╪════════════╪═══════╪═════╪═════╡</span></span>
+<span id="cb4-257"><a href="#cb4-257" tabindex="-1"></a><span class="co">#&gt; │ 0   ┆ 0.787418 ┆ 2022-12-01 ┆ 1.0   ┆ 0   ┆ A   │</span></span>
+<span id="cb4-258"><a href="#cb4-258" tabindex="-1"></a><span class="co">#&gt; │ 1   ┆ 0.55544  ┆ 2022-12-02 ┆ 2.0   ┆ 1   ┆ A   │</span></span>
+<span id="cb4-259"><a href="#cb4-259" tabindex="-1"></a><span class="co">#&gt; │ 2   ┆ 0.486632 ┆ 2022-12-03 ┆ NaN   ┆ 2   ┆ A   │</span></span>
+<span id="cb4-260"><a href="#cb4-260" tabindex="-1"></a><span class="co">#&gt; │ 3   ┆ 0.152169 ┆ 2022-12-04 ┆ NaN   ┆ 3   ┆ B   │</span></span>
+<span id="cb4-261"><a href="#cb4-261" tabindex="-1"></a><span class="co">#&gt; │ 4   ┆ 0.162502 ┆ 2022-12-05 ┆ 0.0   ┆ 4   ┆ B   │</span></span>
+<span id="cb4-262"><a href="#cb4-262" tabindex="-1"></a><span class="co">#&gt; │ 5   ┆ 0.841984 ┆ 2022-12-06 ┆ -5.0  ┆ 5   ┆ C   │</span></span>
+<span id="cb4-263"><a href="#cb4-263" tabindex="-1"></a><span class="co">#&gt; │ 6   ┆ 0.653203 ┆ 2022-12-07 ┆ -42.0 ┆ 6   ┆ X   │</span></span>
+<span id="cb4-264"><a href="#cb4-264" tabindex="-1"></a><span class="co">#&gt; │ 7   ┆ 0.104571 ┆ 2022-12-08 ┆ null  ┆ 7   ┆ X   │</span></span>
+<span id="cb4-265"><a href="#cb4-265" tabindex="-1"></a><span class="co">#&gt; └─────┴──────────┴────────────┴───────┴─────┴─────┘</span></span></code></pre></div>
+</div>
+<div id="polars-expressions" class="section level1">
+<h1>Polars expressions</h1>
+<div id="expressions" class="section level2">
+<h2>Expressions</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="st">&quot;nrs&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="cn">NA</span>, <span class="dv">5</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="st">&quot;names&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;foo&quot;</span>, <span class="st">&quot;ham&quot;</span>, <span class="st">&quot;spam&quot;</span>, <span class="st">&quot;egg&quot;</span>, <span class="cn">NA</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="st">&quot;random&quot;</span> <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">5</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="st">&quot;groups&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;B&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>df</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; ┌──────┬───────┬──────────┬────────┐</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; │ nrs  ┆ names ┆ random   ┆ groups │</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---   ┆ ---      ┆ ---    │</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ str   ┆ f64      ┆ str    │</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; ╞══════╪═══════╪══════════╪════════╡</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; │ 1.0  ┆ foo   ┆ 0.337452 ┆ A      │</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; │ 2.0  ┆ ham   ┆ 0.86921  ┆ A      │</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; │ 3.0  ┆ spam  ┆ 0.08819  ┆ B      │</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; │ null ┆ egg   ┆ 0.172822 ┆ C      │</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; │ 5.0  ┆ null  ┆ 0.232018 ┆ B      │</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; └──────┴───────┴──────────┴────────┘</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">n_unique</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;unique_names_1&quot;</span>),</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">unique</span>()<span class="sc">$</span><span class="fu">count</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;unique_names_2&quot;</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; shape: (1, 2)</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; ┌────────────────┬────────────────┐</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; │ unique_names_1 ┆ unique_names_2 │</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; │ ---            ┆ ---            │</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; │ u32            ┆ u32            │</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; ╞════════════════╪════════════════╡</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; │ 5              ┆ 5              │</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; └────────────────┴────────────────┘</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;sum&quot;</span>),</span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">min</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;min&quot;</span>),</span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">max</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;max&quot;</span>),</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">max</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;other_max&quot;</span>),</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">std</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;std dev&quot;</span>),</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">var</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;variance&quot;</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>)</span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; shape: (1, 6)</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; ┌──────────┬─────────┬─────────┬───────────┬─────────┬──────────┐</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; │ sum      ┆ min     ┆ max     ┆ other_max ┆ std dev ┆ variance │</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; │ ---      ┆ ---     ┆ ---     ┆ ---       ┆ ---     ┆ ---      │</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; │ f64      ┆ f64     ┆ f64     ┆ f64       ┆ f64     ┆ f64      │</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt; ╞══════════╪═════════╪═════════╪═══════════╪═════════╪══════════╡</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt; │ 1.699691 ┆ 0.08819 ┆ 0.86921 ┆ 0.86921   ┆ 0.30947 ┆ 0.095772 │</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt; └──────────┴─────────┴─────────┴───────────┴─────────┴──────────┘</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span>str<span class="sc">$</span><span class="fu">contains</span>(<span class="st">&quot;am$&quot;</span>))<span class="sc">$</span><span class="fu">count</span>()</span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>)</span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="co">#&gt; shape: (1, 1)</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a><span class="co">#&gt; ┌───────┐</span></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="co">#&gt; │ names │</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="co">#&gt; │ ---   │</span></span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a><span class="co">#&gt; │ u32   │</span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a><span class="co">#&gt; ╞═══════╡</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="co">#&gt; │ 2     │</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="co">#&gt; └───────┘</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a></span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">when</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>) <span class="sc">&gt;</span> <span class="fl">0.5</span>)<span class="sc">$</span><span class="fu">then</span>(<span class="dv">0</span>)<span class="sc">$</span><span class="fu">otherwise</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)) <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;nrs&quot;</span>)</span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a>)</span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="co">#&gt; shape: (5, 1)</span></span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="co">#&gt; ┌──────────┐</span></span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a><span class="co">#&gt; │ literal  │</span></span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="co">#&gt; │ ---      │</span></span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="co">#&gt; │ f64      │</span></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="co">#&gt; ╞══════════╡</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co">#&gt; │ 3.711967 │</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="co">#&gt; │ 0.0      │</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="co">#&gt; │ 0.970087 │</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="co">#&gt; │ 1.901042 │</span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a><span class="co">#&gt; │ 2.552198 │</span></span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a><span class="co">#&gt; └──────────┘</span></span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a></span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">when</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;groups&quot;</span>) <span class="sc">==</span> <span class="st">&quot;A&quot;</span>)<span class="sc">$</span><span class="fu">then</span>(<span class="dv">1</span>)<span class="sc">$</span><span class="fu">when</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>) <span class="sc">&gt;</span> <span class="fl">0.5</span>)<span class="sc">$</span><span class="fu">then</span>(<span class="dv">0</span>)<span class="sc">$</span><span class="fu">otherwise</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>))</span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a>)</span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="co">#&gt; shape: (5, 1)</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="co">#&gt; ┌──────────┐</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a><span class="co">#&gt; │ literal  │</span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a><span class="co">#&gt; │ ---      │</span></span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a><span class="co">#&gt; │ f64      │</span></span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a><span class="co">#&gt; ╞══════════╡</span></span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a><span class="co">#&gt; │ 1.0      │</span></span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a><span class="co">#&gt; │ 1.0      │</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a><span class="co">#&gt; │ 0.08819  │</span></span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a><span class="co">#&gt; │ 0.172822 │</span></span>
+<span id="cb5-92"><a href="#cb5-92" tabindex="-1"></a><span class="co">#&gt; │ 0.232018 │</span></span>
+<span id="cb5-93"><a href="#cb5-93" tabindex="-1"></a><span class="co">#&gt; └──────────┘</span></span>
+<span id="cb5-94"><a href="#cb5-94" tabindex="-1"></a></span>
+<span id="cb5-95"><a href="#cb5-95" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb5-96"><a href="#cb5-96" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;*&quot;</span>),  <span class="co"># select all</span></span>
+<span id="cb5-97"><a href="#cb5-97" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;groups&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;sumc(random)/groups&quot;</span>),</span>
+<span id="cb5-98"><a href="#cb5-98" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;random/name&quot;</span>)</span>
+<span id="cb5-99"><a href="#cb5-99" tabindex="-1"></a>)</span>
+<span id="cb5-100"><a href="#cb5-100" tabindex="-1"></a><span class="co">#&gt; shape: (5, 6)</span></span>
+<span id="cb5-101"><a href="#cb5-101" tabindex="-1"></a><span class="co">#&gt; ┌──────┬───────┬──────────┬────────┬─────────────────────┬─────────────┐</span></span>
+<span id="cb5-102"><a href="#cb5-102" tabindex="-1"></a><span class="co">#&gt; │ nrs  ┆ names ┆ random   ┆ groups ┆ sumc(random)/groups ┆ random/name │</span></span>
+<span id="cb5-103"><a href="#cb5-103" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---   ┆ ---      ┆ ---    ┆ ---                 ┆ ---         │</span></span>
+<span id="cb5-104"><a href="#cb5-104" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ str   ┆ f64      ┆ str    ┆ f64                 ┆ list[f64]   │</span></span>
+<span id="cb5-105"><a href="#cb5-105" tabindex="-1"></a><span class="co">#&gt; ╞══════╪═══════╪══════════╪════════╪═════════════════════╪═════════════╡</span></span>
+<span id="cb5-106"><a href="#cb5-106" tabindex="-1"></a><span class="co">#&gt; │ 1.0  ┆ foo   ┆ 0.337452 ┆ A      ┆ 1.206661            ┆ [0.337452]  │</span></span>
+<span id="cb5-107"><a href="#cb5-107" tabindex="-1"></a><span class="co">#&gt; │ 2.0  ┆ ham   ┆ 0.86921  ┆ A      ┆ 1.206661            ┆ [0.86921]   │</span></span>
+<span id="cb5-108"><a href="#cb5-108" tabindex="-1"></a><span class="co">#&gt; │ 3.0  ┆ spam  ┆ 0.08819  ┆ B      ┆ 0.320208            ┆ [0.08819]   │</span></span>
+<span id="cb5-109"><a href="#cb5-109" tabindex="-1"></a><span class="co">#&gt; │ null ┆ egg   ┆ 0.172822 ┆ C      ┆ 0.172822            ┆ [0.172822]  │</span></span>
+<span id="cb5-110"><a href="#cb5-110" tabindex="-1"></a><span class="co">#&gt; │ 5.0  ┆ null  ┆ 0.232018 ┆ B      ┆ 0.320208            ┆ [0.232018]  │</span></span>
+<span id="cb5-111"><a href="#cb5-111" tabindex="-1"></a><span class="co">#&gt; └──────┴───────┴──────────┴────────┴─────────────────────┴─────────────┘</span></span></code></pre></div>
+</div>
+<div id="contexts" class="section level2">
+<h2>Contexts</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;nrs&quot;</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">sort</span>(),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">first</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;first name&quot;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  (pl<span class="sc">$</span><span class="fu">mean</span>(<span class="st">&quot;nrs&quot;</span>) <span class="sc">*</span> <span class="dv">10</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;10xnrs&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; ┌──────┬───────┬────────────┬────────┐</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; │ nrs  ┆ names ┆ first name ┆ 10xnrs │</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---   ┆ ---        ┆ ---    │</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ str   ┆ str        ┆ f64    │</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; ╞══════╪═══════╪════════════╪════════╡</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; │ 11.0 ┆ null  ┆ foo        ┆ 27.5   │</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; │ 11.0 ┆ egg   ┆ foo        ┆ 27.5   │</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; │ 11.0 ┆ foo   ┆ foo        ┆ 27.5   │</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; │ 11.0 ┆ ham   ┆ foo        ┆ 27.5   │</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; │ 11.0 ┆ spam  ┆ foo        ┆ 27.5   │</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; └──────┴───────┴────────────┴────────┘</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">with_columns</span>(</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;nrs&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;nrs_sum&quot;</span>),</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">count</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;count&quot;</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>)</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; shape: (5, 6)</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; ┌──────┬───────┬──────────┬────────┬─────────┬───────┐</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; │ nrs  ┆ names ┆ random   ┆ groups ┆ nrs_sum ┆ count │</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---   ┆ ---      ┆ ---    ┆ ---     ┆ ---   │</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ str   ┆ f64      ┆ str    ┆ f64     ┆ u32   │</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; ╞══════╪═══════╪══════════╪════════╪═════════╪═══════╡</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt; │ 1.0  ┆ foo   ┆ 0.337452 ┆ A      ┆ 11.0    ┆ 5     │</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; │ 2.0  ┆ ham   ┆ 0.86921  ┆ A      ┆ 11.0    ┆ 5     │</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; │ 3.0  ┆ spam  ┆ 0.08819  ┆ B      ┆ 11.0    ┆ 5     │</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; │ null ┆ egg   ┆ 0.172822 ┆ C      ┆ 11.0    ┆ 5     │</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; │ 5.0  ┆ null  ┆ 0.232018 ┆ B      ┆ 11.0    ┆ 5     │</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; └──────┴───────┴──────────┴────────┴─────────┴───────┘</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">groupby</span>(<span class="st">&quot;groups&quot;</span>)<span class="sc">$</span><span class="fu">agg</span>(</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;nrs&quot;</span>),  <span class="co"># sum nrs by groups</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">count</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;count&quot;</span>),  <span class="co"># count group members</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>  <span class="co"># sum random where name != null</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;random&quot;</span>)<span class="sc">$</span><span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">is_not_null</span>())<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">suffix</span>(<span class="st">&quot;_sum&quot;</span>),</span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;names&quot;</span>)<span class="sc">$</span><span class="fu">reverse</span>()<span class="sc">$</span><span class="fu">alias</span>((<span class="st">&quot;reversed names&quot;</span>))</span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>)</span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; shape: (3, 5)</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; ┌────────┬──────┬───────┬────────────┬────────────────┐</span></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; │ groups ┆ nrs  ┆ count ┆ random_sum ┆ reversed names │</span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---  ┆ ---   ┆ ---        ┆ ---            │</span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ f64  ┆ u32   ┆ f64        ┆ list[str]      │</span></span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt; ╞════════╪══════╪═══════╪════════════╪════════════════╡</span></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt; │ B      ┆ 8.0  ┆ 2     ┆ 0.08819    ┆ [null, &quot;spam&quot;] │</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt; │ C      ┆ null ┆ 1     ┆ 0.172822   ┆ [&quot;egg&quot;]        │</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; │ A      ┆ 3.0  ┆ 2     ┆ 1.206661   ┆ [&quot;ham&quot;, &quot;foo&quot;] │</span></span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; └────────┴──────┴───────┴────────────┴────────────────┘</span></span></code></pre></div>
+</div>
+<div id="groupby" class="section level2">
+<h2>GroupBy</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>url <span class="ot">=</span> <span class="st">&quot;https://theunitedstates.io/congress-legislators/legislators-historical.csv&quot;</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>dtypes <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="st">&quot;first_name&quot;</span> <span class="ot">=</span> pl<span class="sc">$</span>Categorical,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="st">&quot;gender&quot;</span> <span class="ot">=</span> pl<span class="sc">$</span>Categorical,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="st">&quot;type&quot;</span> <span class="ot">=</span> pl<span class="sc">$</span>Categorical,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="st">&quot;state&quot;</span> <span class="ot">=</span> pl<span class="sc">$</span>Categorical,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="st">&quot;party&quot;</span> <span class="ot">=</span> pl<span class="sc">$</span>Categorical</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co"># dtypes argument</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>dataset <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">read_csv</span>(url)<span class="sc">$</span><span class="fu">with_columns</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;birthday&quot;</span>)<span class="sc">$</span>str<span class="sc">$</span><span class="fu">strptime</span>(pl<span class="sc">$</span>Date, <span class="st">&quot;%Y-%m-%d&quot;</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; tmp file placed in </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;  /tmp/RtmpHLca3z/https...theunitedstates.io.congress.legislators.legislators.historical.csv</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>dataset<span class="sc">$</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="fu">lazy</span>()<span class="sc">$</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;first_name&quot;</span>)<span class="sc">$</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="fu">agg</span>(</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">count</span>(),</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;gender&quot;</span>),</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">first</span>(<span class="st">&quot;last_name&quot;</span>))<span class="sc">$</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="st">&quot;count&quot;</span>, <span class="at">descending =</span> <span class="cn">TRUE</span>)<span class="sc">$</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>  <span class="fu">limit</span>(<span class="dv">5</span>)<span class="sc">$</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; ┌────────────┬───────┬───────────────────┬───────────┐</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; │ first_name ┆ count ┆ gender            ┆ last_name │</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; │ ---        ┆ ---   ┆ ---               ┆ ---       │</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; │ str        ┆ u32   ┆ list[str]         ┆ str       │</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt; ╞════════════╪═══════╪═══════════════════╪═══════════╡</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; │ John       ┆ 1256  ┆ [&quot;M&quot;, &quot;M&quot;, … &quot;M&quot;] ┆ Walker    │</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; │ William    ┆ 1022  ┆ [&quot;M&quot;, &quot;M&quot;, … &quot;M&quot;] ┆ Few       │</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; │ James      ┆ 714   ┆ [&quot;M&quot;, &quot;M&quot;, … &quot;M&quot;] ┆ Armstrong │</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; │ Thomas     ┆ 454   ┆ [&quot;M&quot;, &quot;M&quot;, … &quot;M&quot;] ┆ Tucker    │</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; │ Charles    ┆ 439   ┆ [&quot;M&quot;, &quot;M&quot;, … &quot;M&quot;] ┆ Carroll   │</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; └────────────┴───────┴───────────────────┴───────────┘</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>dataset<span class="sc">$</span><span class="fu">lazy</span>()<span class="sc">$</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;state&quot;</span>)<span class="sc">$</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>  <span class="fu">agg</span>(</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>    (pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;party&quot;</span>) <span class="sc">==</span> <span class="st">&quot;Anti-Administration&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;anti&quot;</span>),</span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a>    (pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;party&quot;</span>) <span class="sc">==</span> <span class="st">&quot;Pro-Administration&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;pro&quot;</span>))<span class="sc">$</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="st">&quot;pro&quot;</span>, <span class="at">descending =</span> <span class="cn">TRUE</span>)<span class="sc">$</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>  <span class="fu">limit</span>(<span class="dv">5</span>)<span class="sc">$</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; ┌───────┬──────┬──────┐</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; │ state ┆ anti ┆ pro  │</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; │ ---   ┆ ---  ┆ ---  │</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt; │ str   ┆ u32  ┆ u32  │</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; ╞═══════╪══════╪══════╡</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; │ OL    ┆ null ┆ null │</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; │ PI    ┆ null ┆ null │</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; │ NJ    ┆ 0    ┆ 3    │</span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; │ CT    ┆ 0    ┆ 3    │</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; │ NC    ┆ 1    ┆ 2    │</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; └───────┴──────┴──────┘</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a>dataset<span class="sc">$</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a>  <span class="fu">lazy</span>()<span class="sc">$</span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="fu">c</span>(<span class="st">&quot;state&quot;</span>, <span class="st">&quot;party&quot;</span>))<span class="sc">$</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a>  <span class="fu">agg</span>(pl<span class="sc">$</span><span class="fu">count</span>(<span class="st">&quot;party&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;count&quot;</span>))<span class="sc">$</span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a>  <span class="fu">filter</span>((pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;party&quot;</span>) <span class="sc">==</span> <span class="st">&quot;Anti-Administration&quot;</span>) <span class="sc">|</span> (pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;party&quot;</span>) <span class="sc">==</span> <span class="st">&quot;Pro-Administration&quot;</span>))<span class="sc">$</span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="st">&quot;count&quot;</span>, <span class="at">descending =</span> <span class="cn">TRUE</span>)<span class="sc">$</span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>)<span class="sc">$</span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt; ┌───────┬─────────────────────┬───────┐</span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; │ state ┆ party               ┆ count │</span></span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a><span class="co">#&gt; │ ---   ┆ ---                 ┆ ---   │</span></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="co">#&gt; │ str   ┆ str                 ┆ u32   │</span></span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a><span class="co">#&gt; ╞═══════╪═════════════════════╪═══════╡</span></span>
+<span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a><span class="co">#&gt; │ NJ    ┆ Pro-Administration  ┆ 3     │</span></span>
+<span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a><span class="co">#&gt; │ VA    ┆ Anti-Administration ┆ 3     │</span></span>
+<span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a><span class="co">#&gt; │ CT    ┆ Pro-Administration  ┆ 3     │</span></span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; │ NC    ┆ Pro-Administration  ┆ 2     │</span></span>
+<span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a><span class="co">#&gt; │ NC    ┆ Anti-Administration ┆ 1     │</span></span>
+<span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="co">#&gt; └───────┴─────────────────────┴───────┘</span></span></code></pre></div>
+</div>
+<div id="folds" class="section level2">
+<h2>Folds</h2>
+</div>
+<div id="window-functions" class="section level2">
+<h2>Window functions</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">read_csv</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="st">&quot;https://gist.githubusercontent.com/ritchie46/cac6b337ea52281aa23c049250a4ff03/raw/89a957ff3919d90e6ef2d34235e6bf22304f3366/pokemon.csv&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>filtered <span class="ot">=</span> df<span class="sc">$</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Type 2&quot;</span>) <span class="sc">==</span> <span class="st">&quot;Psychic&quot;</span>)<span class="sc">$</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">&quot;Name&quot;</span>, <span class="st">&quot;Type 1&quot;</span>, <span class="st">&quot;Speed&quot;</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>filtered</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; shape: (7, 3)</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; ┌─────────────────────┬────────┬───────┐</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; │ Name                ┆ Type 1 ┆ Speed │</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; │ ---                 ┆ ---    ┆ ---   │</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; │ str                 ┆ str    ┆ i64   │</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; ╞═════════════════════╪════════╪═══════╡</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; │ Slowpoke            ┆ Water  ┆ 15    │</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; │ Slowbro             ┆ Water  ┆ 30    │</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; │ SlowbroMega Slowbro ┆ Water  ┆ 30    │</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; │ Exeggcute           ┆ Grass  ┆ 40    │</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; │ Exeggutor           ┆ Grass  ┆ 55    │</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; │ Starmie             ┆ Water  ┆ 115   │</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; │ Jynx                ┆ Ice    ┆ 95    │</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; └─────────────────────┴────────┴───────┘</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>filtered<span class="sc">$</span><span class="fu">with_columns</span>(</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="fu">c</span>(<span class="st">&quot;Name&quot;</span>, <span class="st">&quot;Speed&quot;</span>))<span class="sc">$</span><span class="fu">sort</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;Type 1&quot;</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>)</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; shape: (7, 3)</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; ┌─────────────────────┬────────┬───────┐</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; │ Name                ┆ Type 1 ┆ Speed │</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; │ ---                 ┆ ---    ┆ ---   │</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; │ str                 ┆ str    ┆ i64   │</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; ╞═════════════════════╪════════╪═══════╡</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; │ Slowbro             ┆ Water  ┆ 15    │</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; │ SlowbroMega Slowbro ┆ Water  ┆ 30    │</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; │ Slowpoke            ┆ Water  ┆ 30    │</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; │ Exeggcute           ┆ Grass  ┆ 40    │</span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; │ Exeggutor           ┆ Grass  ┆ 55    │</span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt; │ Starmie             ┆ Water  ┆ 115   │</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; │ Jynx                ┆ Ice    ┆ 95    │</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; └─────────────────────┴────────┴───────┘</span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co"># aggregate and broadcast within a group</span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co"># output type: -&gt; Int32</span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a>pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;foo&quot;</span>)<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;groups&quot;</span>)</span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; polars Expr: col(&quot;foo&quot;).sum().over([col(&quot;groups&quot;)])</span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co"># sum within a group and multiply with group elements</span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co"># output type: -&gt; Int32</span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;x&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>() <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;y&quot;</span>))<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;groups&quot;</span>)</span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt; polars Expr: [(col(&quot;x&quot;).sum()) * (col(&quot;y&quot;))].over([col(&quot;groups&quot;)])</span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co"># sum within a group and multiply with group elements </span></span>
+<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="co"># and aggregate/implode the group to a list</span></span>
+<span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="co"># output type: -&gt; List(Int32)</span></span>
+<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;x&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>() <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;y&quot;</span>))<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;groups&quot;</span>)</span>
+<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="co">#&gt; polars Expr: [(col(&quot;x&quot;).sum()) * (col(&quot;y&quot;))].list().over([col(&quot;groups&quot;)])</span></span>
+<span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a></span>
+<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="co"># note that it will require an explicit `implode()` call</span></span>
+<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="co"># sum within a group and multiply with group elements </span></span>
+<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="co"># and aggregate/implode the group to a list</span></span>
+<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="co"># the explode call unpack the list and combine inner elements to one column</span></span>
+<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="co"># This is the fastest method to do things over groups when the groups are sorted</span></span>
+<span id="cb9-60"><a href="#cb9-60" tabindex="-1"></a>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;x&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>() <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;y&quot;</span>))<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;groups&quot;</span>)<span class="sc">$</span><span class="fu">explode</span>()</span>
+<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="co">#&gt; polars Expr: [(col(&quot;x&quot;).sum()) * (col(&quot;y&quot;))].list().over([col(&quot;groups&quot;)]).explode()</span></span>
+<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a></span>
+<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">sort</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">head</span>(<span class="dv">3</span>)<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">explode</span>(),</span>
+<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Name&quot;</span>)<span class="sc">$</span><span class="fu">sort_by</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Speed&quot;</span>))<span class="sc">$</span><span class="fu">head</span>(<span class="dv">3</span>)<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">explode</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;fastest/group&quot;</span>),</span>
+<span id="cb9-66"><a href="#cb9-66" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Name&quot;</span>)<span class="sc">$</span><span class="fu">sort_by</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Attack&quot;</span>))<span class="sc">$</span><span class="fu">head</span>(<span class="dv">3</span>)<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">explode</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;strongest/group&quot;</span>),</span>
+<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;Name&quot;</span>)<span class="sc">$</span><span class="fu">sort</span>()<span class="sc">$</span><span class="fu">head</span>(<span class="dv">3</span>)<span class="sc">$</span><span class="fu">implode</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;Type 1&quot;</span>)<span class="sc">$</span><span class="fu">explode</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;sorted_by_alphabet&quot;</span>)</span>
+<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a>)</span>
+<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="co">#&gt; shape: (43, 4)</span></span>
+<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="co">#&gt; ┌────────┬─────────────────────┬─────────────────┬─────────────────────────┐</span></span>
+<span id="cb9-71"><a href="#cb9-71" tabindex="-1"></a><span class="co">#&gt; │ Type 1 ┆ fastest/group       ┆ strongest/group ┆ sorted_by_alphabet      │</span></span>
+<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---                 ┆ ---             ┆ ---                     │</span></span>
+<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ str                 ┆ str             ┆ str                     │</span></span>
+<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═════════════════════╪═════════════════╪═════════════════════════╡</span></span>
+<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="co">#&gt; │ Bug    ┆ Paras               ┆ Metapod         ┆ Beedrill                │</span></span>
+<span id="cb9-76"><a href="#cb9-76" tabindex="-1"></a><span class="co">#&gt; │ Bug    ┆ Metapod             ┆ Kakuna          ┆ BeedrillMega Beedrill   │</span></span>
+<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="co">#&gt; │ Bug    ┆ Parasect            ┆ Caterpie        ┆ Butterfree              │</span></span>
+<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="co">#&gt; │ Dragon ┆ Dratini             ┆ Dratini         ┆ Dragonair               │</span></span>
+<span id="cb9-79"><a href="#cb9-79" tabindex="-1"></a><span class="co">#&gt; │ …      ┆ …                   ┆ …               ┆ …                       │</span></span>
+<span id="cb9-80"><a href="#cb9-80" tabindex="-1"></a><span class="co">#&gt; │ Rock   ┆ Omanyte             ┆ Omastar         ┆ Geodude                 │</span></span>
+<span id="cb9-81"><a href="#cb9-81" tabindex="-1"></a><span class="co">#&gt; │ Water  ┆ Slowpoke            ┆ Magikarp        ┆ Blastoise               │</span></span>
+<span id="cb9-82"><a href="#cb9-82" tabindex="-1"></a><span class="co">#&gt; │ Water  ┆ Slowbro             ┆ Tentacool       ┆ BlastoiseMega Blastoise │</span></span>
+<span id="cb9-83"><a href="#cb9-83" tabindex="-1"></a><span class="co">#&gt; │ Water  ┆ SlowbroMega Slowbro ┆ Horsea          ┆ Cloyster                │</span></span>
+<span id="cb9-84"><a href="#cb9-84" tabindex="-1"></a><span class="co">#&gt; └────────┴─────────────────────┴─────────────────┴─────────────────────────┘</span></span></code></pre></div>
+</div>
+</div>
+<div id="list-context-and-row-wise-computations" class="section level1">
+<h1>List context and row wise computations</h1>
+</div>
+<div id="r-examples" class="section level1">
+<h1>R examples</h1>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>df <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">DataFrame</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="st">&quot;A&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="st">&quot;fruits&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;banana&quot;</span>, <span class="st">&quot;banana&quot;</span>, <span class="st">&quot;apple&quot;</span>, <span class="st">&quot;apple&quot;</span>, <span class="st">&quot;banana&quot;</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="st">&quot;B&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="st">&quot;cars&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;beetle&quot;</span>, <span class="st">&quot;audi&quot;</span>, <span class="st">&quot;beetle&quot;</span>, <span class="st">&quot;beetle&quot;</span>, <span class="st">&quot;beetle&quot;</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="st">&quot;optional&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">28</span>, <span class="dv">300</span>, <span class="cn">NA</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">30</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>df</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; shape: (5, 5)</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; ┌─────┬────────┬─────┬────────┬──────────┐</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ fruits ┆ B   ┆ cars   ┆ optional │</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---    ┆ --- ┆ ---    ┆ ---      │</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ str    ┆ f64 ┆ str    ┆ f64      │</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; ╞═════╪════════╪═════╪════════╪══════════╡</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ banana ┆ 5.0 ┆ beetle ┆ 28.0     │</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ banana ┆ 4.0 ┆ audi   ┆ 300.0    │</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ apple  ┆ 3.0 ┆ beetle ┆ null     │</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ apple  ┆ 2.0 ┆ beetle ┆ 2.0      │</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ banana ┆ 1.0 ┆ beetle ┆ -30.0    │</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; └─────┴────────┴─────┴────────┴──────────┘</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co"># Within select, we can use the col function to refer to columns$</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co"># If we are not applying any function to the column, we can also use the column name as a string$</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;A&quot;</span>),</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>  <span class="st">&quot;B&quot;</span>,         <span class="co"># the col part is inferred</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">lit</span>(<span class="st">&quot;B&quot;</span>)  <span class="co"># the pl$lit functions tell polars we mean the literal &quot;B&quot;</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>)</span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt; ┌─────┬─────┬─────────┐</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ B   ┆ literal │</span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ --- ┆ ---     │</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64 ┆ str     │</span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt; ╞═════╪═════╪═════════╡</span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 5.0 ┆ B       │</span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 4.0 ┆ B       │</span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 3.0 ┆ B       │</span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 2.0 ┆ B       │</span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 1.0 ┆ B       │</span></span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="co">#&gt; └─────┴─────┴─────────┘</span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a><span class="co"># We can use a list within select (example above) or a comma-separated list of expressions (this example)$</span></span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;A&quot;</span>),</span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a>  <span class="st">&quot;B&quot;</span>,      </span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">lit</span>(<span class="st">&quot;B&quot;</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a>)</span>
+<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a><span class="co">#&gt; ┌─────┬─────┬─────────┐</span></span>
+<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ B   ┆ literal │</span></span>
+<span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ --- ┆ ---     │</span></span>
+<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ f64 ┆ str     │</span></span>
+<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="co">#&gt; ╞═════╪═════╪═════════╡</span></span>
+<span id="cb10-54"><a href="#cb10-54" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ 5.0 ┆ B       │</span></span>
+<span id="cb10-55"><a href="#cb10-55" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ 4.0 ┆ B       │</span></span>
+<span id="cb10-56"><a href="#cb10-56" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ 3.0 ┆ B       │</span></span>
+<span id="cb10-57"><a href="#cb10-57" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ 2.0 ┆ B       │</span></span>
+<span id="cb10-58"><a href="#cb10-58" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ 1.0 ┆ B       │</span></span>
+<span id="cb10-59"><a href="#cb10-59" tabindex="-1"></a><span class="co">#&gt; └─────┴─────┴─────────┘</span></span>
+<span id="cb10-60"><a href="#cb10-60" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" tabindex="-1"></a><span class="co"># We can select columns with a regex if the regex starts with &#39;^&#39; and ends with &#39;$&#39;</span></span>
+<span id="cb10-62"><a href="#cb10-62" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(    </span>
+<span id="cb10-63"><a href="#cb10-63" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;^A|B$&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()</span>
+<span id="cb10-64"><a href="#cb10-64" tabindex="-1"></a>)</span>
+<span id="cb10-65"><a href="#cb10-65" tabindex="-1"></a><span class="co">#&gt; shape: (1, 2)</span></span>
+<span id="cb10-66"><a href="#cb10-66" tabindex="-1"></a><span class="co">#&gt; ┌──────┬──────┐</span></span>
+<span id="cb10-67"><a href="#cb10-67" tabindex="-1"></a><span class="co">#&gt; │ A    ┆ B    │</span></span>
+<span id="cb10-68"><a href="#cb10-68" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---  │</span></span>
+<span id="cb10-69"><a href="#cb10-69" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ f64  │</span></span>
+<span id="cb10-70"><a href="#cb10-70" tabindex="-1"></a><span class="co">#&gt; ╞══════╪══════╡</span></span>
+<span id="cb10-71"><a href="#cb10-71" tabindex="-1"></a><span class="co">#&gt; │ 15.0 ┆ 15.0 │</span></span>
+<span id="cb10-72"><a href="#cb10-72" tabindex="-1"></a><span class="co">#&gt; └──────┴──────┘</span></span>
+<span id="cb10-73"><a href="#cb10-73" tabindex="-1"></a></span>
+<span id="cb10-74"><a href="#cb10-74" tabindex="-1"></a><span class="co"># We can select multiple columns by name</span></span>
+<span id="cb10-75"><a href="#cb10-75" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-76"><a href="#cb10-76" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>))<span class="sc">$</span><span class="fu">sum</span>()</span>
+<span id="cb10-77"><a href="#cb10-77" tabindex="-1"></a>)</span>
+<span id="cb10-78"><a href="#cb10-78" tabindex="-1"></a><span class="co">#&gt; shape: (1, 2)</span></span>
+<span id="cb10-79"><a href="#cb10-79" tabindex="-1"></a><span class="co">#&gt; ┌──────┬──────┐</span></span>
+<span id="cb10-80"><a href="#cb10-80" tabindex="-1"></a><span class="co">#&gt; │ A    ┆ B    │</span></span>
+<span id="cb10-81"><a href="#cb10-81" tabindex="-1"></a><span class="co">#&gt; │ ---  ┆ ---  │</span></span>
+<span id="cb10-82"><a href="#cb10-82" tabindex="-1"></a><span class="co">#&gt; │ f64  ┆ f64  │</span></span>
+<span id="cb10-83"><a href="#cb10-83" tabindex="-1"></a><span class="co">#&gt; ╞══════╪══════╡</span></span>
+<span id="cb10-84"><a href="#cb10-84" tabindex="-1"></a><span class="co">#&gt; │ 15.0 ┆ 15.0 │</span></span>
+<span id="cb10-85"><a href="#cb10-85" tabindex="-1"></a><span class="co">#&gt; └──────┴──────┘</span></span>
+<span id="cb10-86"><a href="#cb10-86" tabindex="-1"></a></span>
+<span id="cb10-87"><a href="#cb10-87" tabindex="-1"></a><span class="co"># We select everything in normal order</span></span>
+<span id="cb10-88"><a href="#cb10-88" tabindex="-1"></a><span class="co"># Then we select everything in reversed order</span></span>
+<span id="cb10-89"><a href="#cb10-89" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-90"><a href="#cb10-90" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">all</span>(),</span>
+<span id="cb10-91"><a href="#cb10-91" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">reverse</span>()<span class="sc">$</span><span class="fu">suffix</span>(<span class="st">&quot;_reverse&quot;</span>)</span>
+<span id="cb10-92"><a href="#cb10-92" tabindex="-1"></a>)</span>
+<span id="cb10-93"><a href="#cb10-93" tabindex="-1"></a><span class="co">#&gt; shape: (5, 10)</span></span>
+<span id="cb10-94"><a href="#cb10-94" tabindex="-1"></a><span class="co">#&gt; ┌─────┬────────┬─────┬────────┬───┬────────────────┬───────────┬──────────────┬──────────────────┐</span></span>
+<span id="cb10-95"><a href="#cb10-95" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ fruits ┆ B   ┆ cars   ┆ … ┆ fruits_reverse ┆ B_reverse ┆ cars_reverse ┆ optional_reverse │</span></span>
+<span id="cb10-96"><a href="#cb10-96" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---    ┆ --- ┆ ---    ┆   ┆ ---            ┆ ---       ┆ ---          ┆ ---              │</span></span>
+<span id="cb10-97"><a href="#cb10-97" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ str    ┆ f64 ┆ str    ┆   ┆ str            ┆ f64       ┆ str          ┆ f64              │</span></span>
+<span id="cb10-98"><a href="#cb10-98" tabindex="-1"></a><span class="co">#&gt; ╞═════╪════════╪═════╪════════╪═══╪════════════════╪═══════════╪══════════════╪══════════════════╡</span></span>
+<span id="cb10-99"><a href="#cb10-99" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ banana ┆ 5.0 ┆ beetle ┆ … ┆ banana         ┆ 1.0       ┆ beetle       ┆ -30.0            │</span></span>
+<span id="cb10-100"><a href="#cb10-100" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ banana ┆ 4.0 ┆ audi   ┆ … ┆ apple          ┆ 2.0       ┆ beetle       ┆ 2.0              │</span></span>
+<span id="cb10-101"><a href="#cb10-101" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ apple  ┆ 3.0 ┆ beetle ┆ … ┆ apple          ┆ 3.0       ┆ beetle       ┆ null             │</span></span>
+<span id="cb10-102"><a href="#cb10-102" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ apple  ┆ 2.0 ┆ beetle ┆ … ┆ banana         ┆ 4.0       ┆ audi         ┆ 300.0            │</span></span>
+<span id="cb10-103"><a href="#cb10-103" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ banana ┆ 1.0 ┆ beetle ┆ … ┆ banana         ┆ 5.0       ┆ beetle       ┆ 28.0             │</span></span>
+<span id="cb10-104"><a href="#cb10-104" tabindex="-1"></a><span class="co">#&gt; └─────┴────────┴─────┴────────┴───┴────────────────┴───────────┴──────────────┴──────────────────┘</span></span>
+<span id="cb10-105"><a href="#cb10-105" tabindex="-1"></a></span>
+<span id="cb10-106"><a href="#cb10-106" tabindex="-1"></a><span class="co"># All expressions run in parallel</span></span>
+<span id="cb10-107"><a href="#cb10-107" tabindex="-1"></a><span class="co"># Single valued `Series` are broadcasted to the shape of the `DataFrame`</span></span>
+<span id="cb10-108"><a href="#cb10-108" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-109"><a href="#cb10-109" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">all</span>(),</span>
+<span id="cb10-110"><a href="#cb10-110" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">all</span>()<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">suffix</span>(<span class="st">&quot;_sum&quot;</span>) <span class="co"># This is a single valued Series broadcasted to the shape of the DataFrame</span></span>
+<span id="cb10-111"><a href="#cb10-111" tabindex="-1"></a>)</span>
+<span id="cb10-112"><a href="#cb10-112" tabindex="-1"></a><span class="co">#&gt; shape: (5, 10)</span></span>
+<span id="cb10-113"><a href="#cb10-113" tabindex="-1"></a><span class="co">#&gt; ┌─────┬────────┬─────┬────────┬───┬────────────┬───────┬──────────┬──────────────┐</span></span>
+<span id="cb10-114"><a href="#cb10-114" tabindex="-1"></a><span class="co">#&gt; │ A   ┆ fruits ┆ B   ┆ cars   ┆ … ┆ fruits_sum ┆ B_sum ┆ cars_sum ┆ optional_sum │</span></span>
+<span id="cb10-115"><a href="#cb10-115" tabindex="-1"></a><span class="co">#&gt; │ --- ┆ ---    ┆ --- ┆ ---    ┆   ┆ ---        ┆ ---   ┆ ---      ┆ ---          │</span></span>
+<span id="cb10-116"><a href="#cb10-116" tabindex="-1"></a><span class="co">#&gt; │ f64 ┆ str    ┆ f64 ┆ str    ┆   ┆ str        ┆ f64   ┆ str      ┆ f64          │</span></span>
+<span id="cb10-117"><a href="#cb10-117" tabindex="-1"></a><span class="co">#&gt; ╞═════╪════════╪═════╪════════╪═══╪════════════╪═══════╪══════════╪══════════════╡</span></span>
+<span id="cb10-118"><a href="#cb10-118" tabindex="-1"></a><span class="co">#&gt; │ 1.0 ┆ banana ┆ 5.0 ┆ beetle ┆ … ┆ null       ┆ 15.0  ┆ null     ┆ 300.0        │</span></span>
+<span id="cb10-119"><a href="#cb10-119" tabindex="-1"></a><span class="co">#&gt; │ 2.0 ┆ banana ┆ 4.0 ┆ audi   ┆ … ┆ null       ┆ 15.0  ┆ null     ┆ 300.0        │</span></span>
+<span id="cb10-120"><a href="#cb10-120" tabindex="-1"></a><span class="co">#&gt; │ 3.0 ┆ apple  ┆ 3.0 ┆ beetle ┆ … ┆ null       ┆ 15.0  ┆ null     ┆ 300.0        │</span></span>
+<span id="cb10-121"><a href="#cb10-121" tabindex="-1"></a><span class="co">#&gt; │ 4.0 ┆ apple  ┆ 2.0 ┆ beetle ┆ … ┆ null       ┆ 15.0  ┆ null     ┆ 300.0        │</span></span>
+<span id="cb10-122"><a href="#cb10-122" tabindex="-1"></a><span class="co">#&gt; │ 5.0 ┆ banana ┆ 1.0 ┆ beetle ┆ … ┆ null       ┆ 15.0  ┆ null     ┆ 300.0        │</span></span>
+<span id="cb10-123"><a href="#cb10-123" tabindex="-1"></a><span class="co">#&gt; └─────┴────────┴─────┴────────┴───┴────────────┴───────┴──────────┴──────────────┘</span></span>
+<span id="cb10-124"><a href="#cb10-124" tabindex="-1"></a></span>
+<span id="cb10-125"><a href="#cb10-125" tabindex="-1"></a><span class="co"># Filters can also be applied within an expression</span></span>
+<span id="cb10-126"><a href="#cb10-126" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-127"><a href="#cb10-127" tabindex="-1"></a>  <span class="co"># Sum the values of A where the fruits column starts with &#39;b&#39;</span></span>
+<span id="cb10-128"><a href="#cb10-128" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;A&quot;</span>)<span class="sc">$</span><span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span>str<span class="sc">$</span><span class="fu">contains</span>(<span class="st">&quot;^b$*&quot;</span>))<span class="sc">$</span><span class="fu">sum</span>()</span>
+<span id="cb10-129"><a href="#cb10-129" tabindex="-1"></a>)</span>
+<span id="cb10-130"><a href="#cb10-130" tabindex="-1"></a><span class="co">#&gt; shape: (1, 1)</span></span>
+<span id="cb10-131"><a href="#cb10-131" tabindex="-1"></a><span class="co">#&gt; ┌─────┐</span></span>
+<span id="cb10-132"><a href="#cb10-132" tabindex="-1"></a><span class="co">#&gt; │ A   │</span></span>
+<span id="cb10-133"><a href="#cb10-133" tabindex="-1"></a><span class="co">#&gt; │ --- │</span></span>
+<span id="cb10-134"><a href="#cb10-134" tabindex="-1"></a><span class="co">#&gt; │ f64 │</span></span>
+<span id="cb10-135"><a href="#cb10-135" tabindex="-1"></a><span class="co">#&gt; ╞═════╡</span></span>
+<span id="cb10-136"><a href="#cb10-136" tabindex="-1"></a><span class="co">#&gt; │ 8.0 │</span></span>
+<span id="cb10-137"><a href="#cb10-137" tabindex="-1"></a><span class="co">#&gt; └─────┘</span></span>
+<span id="cb10-138"><a href="#cb10-138" tabindex="-1"></a></span>
+<span id="cb10-139"><a href="#cb10-139" tabindex="-1"></a><span class="co"># We can do arithmetic on columns</span></span>
+<span id="cb10-140"><a href="#cb10-140" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-141"><a href="#cb10-141" tabindex="-1"></a>  ((pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;A&quot;</span>) <span class="sc">/</span> <span class="fl">124.0</span> <span class="sc">*</span> pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)) <span class="sc">/</span> pl<span class="sc">$</span><span class="fu">sum</span>(<span class="st">&quot;B&quot;</span>))<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;computed&quot;</span>)</span>
+<span id="cb10-142"><a href="#cb10-142" tabindex="-1"></a>)</span>
+<span id="cb10-143"><a href="#cb10-143" tabindex="-1"></a><span class="co">#&gt; shape: (5, 1)</span></span>
+<span id="cb10-144"><a href="#cb10-144" tabindex="-1"></a><span class="co">#&gt; ┌──────────┐</span></span>
+<span id="cb10-145"><a href="#cb10-145" tabindex="-1"></a><span class="co">#&gt; │ computed │</span></span>
+<span id="cb10-146"><a href="#cb10-146" tabindex="-1"></a><span class="co">#&gt; │ ---      │</span></span>
+<span id="cb10-147"><a href="#cb10-147" tabindex="-1"></a><span class="co">#&gt; │ f64      │</span></span>
+<span id="cb10-148"><a href="#cb10-148" tabindex="-1"></a><span class="co">#&gt; ╞══════════╡</span></span>
+<span id="cb10-149"><a href="#cb10-149" tabindex="-1"></a><span class="co">#&gt; │ 0.002688 │</span></span>
+<span id="cb10-150"><a href="#cb10-150" tabindex="-1"></a><span class="co">#&gt; │ 0.004301 │</span></span>
+<span id="cb10-151"><a href="#cb10-151" tabindex="-1"></a><span class="co">#&gt; │ 0.004839 │</span></span>
+<span id="cb10-152"><a href="#cb10-152" tabindex="-1"></a><span class="co">#&gt; │ 0.004301 │</span></span>
+<span id="cb10-153"><a href="#cb10-153" tabindex="-1"></a><span class="co">#&gt; │ 0.002688 │</span></span>
+<span id="cb10-154"><a href="#cb10-154" tabindex="-1"></a><span class="co">#&gt; └──────────┘</span></span>
+<span id="cb10-155"><a href="#cb10-155" tabindex="-1"></a></span>
+<span id="cb10-156"><a href="#cb10-156" tabindex="-1"></a><span class="co"># We can combine columns by a predicate</span></span>
+<span id="cb10-157"><a href="#cb10-157" tabindex="-1"></a><span class="co"># For example when the `fruits` column is &#39;banana&#39; we set the value equal to the</span></span>
+<span id="cb10-158"><a href="#cb10-158" tabindex="-1"></a><span class="co"># value in `B` column for that row, otherwise we set the value to be -1</span></span>
+<span id="cb10-159"><a href="#cb10-159" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">select</span>(</span>
+<span id="cb10-160"><a href="#cb10-160" tabindex="-1"></a>  <span class="st">&quot;fruits&quot;</span>,</span>
+<span id="cb10-161"><a href="#cb10-161" tabindex="-1"></a>  <span class="st">&quot;B&quot;</span>,</span>
+<span id="cb10-162"><a href="#cb10-162" tabindex="-1"></a>  pl<span class="sc">$</span><span class="fu">when</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;fruits&quot;</span>) <span class="sc">==</span> <span class="st">&quot;banana&quot;</span>)<span class="sc">$</span><span class="fu">then</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>))<span class="sc">$</span><span class="fu">otherwise</span>(<span class="sc">-</span><span class="dv">1</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;b&quot;</span>)</span>
+<span id="cb10-163"><a href="#cb10-163" tabindex="-1"></a>)</span>
+<span id="cb10-164"><a href="#cb10-164" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb10-165"><a href="#cb10-165" tabindex="-1"></a><span class="co">#&gt; ┌────────┬─────┬──────┐</span></span>
+<span id="cb10-166"><a href="#cb10-166" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ B   ┆ b    │</span></span>
+<span id="cb10-167"><a href="#cb10-167" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ --- ┆ ---  │</span></span>
+<span id="cb10-168"><a href="#cb10-168" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ f64 ┆ f64  │</span></span>
+<span id="cb10-169"><a href="#cb10-169" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═════╪══════╡</span></span>
+<span id="cb10-170"><a href="#cb10-170" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 5.0 ┆ 5.0  │</span></span>
+<span id="cb10-171"><a href="#cb10-171" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 4.0 ┆ 4.0  │</span></span>
+<span id="cb10-172"><a href="#cb10-172" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 3.0 ┆ -1.0 │</span></span>
+<span id="cb10-173"><a href="#cb10-173" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 2.0 ┆ -1.0 │</span></span>
+<span id="cb10-174"><a href="#cb10-174" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 1.0 ┆ 1.0  │</span></span>
+<span id="cb10-175"><a href="#cb10-175" tabindex="-1"></a><span class="co">#&gt; └────────┴─────┴──────┘</span></span>
+<span id="cb10-176"><a href="#cb10-176" tabindex="-1"></a></span>
+<span id="cb10-177"><a href="#cb10-177" tabindex="-1"></a><span class="co"># We can combine columns by a fold operation on column level$</span></span>
+<span id="cb10-178"><a href="#cb10-178" tabindex="-1"></a><span class="co"># For example we do a horizontal sum where we:</span></span>
+<span id="cb10-179"><a href="#cb10-179" tabindex="-1"></a><span class="co"># - start with 0</span></span>
+<span id="cb10-180"><a href="#cb10-180" tabindex="-1"></a><span class="co"># - add the value in the `A` column</span></span>
+<span id="cb10-181"><a href="#cb10-181" tabindex="-1"></a><span class="co"># - add the value in the `B` column</span></span>
+<span id="cb10-182"><a href="#cb10-182" tabindex="-1"></a><span class="co"># - add the value in the `B` column squared</span></span>
+<span id="cb10-183"><a href="#cb10-183" tabindex="-1"></a><span class="co"># df$select(</span></span>
+<span id="cb10-184"><a href="#cb10-184" tabindex="-1"></a><span class="co">#   &quot;A&quot;,</span></span>
+<span id="cb10-185"><a href="#cb10-185" tabindex="-1"></a><span class="co">#   &quot;B&quot;,</span></span>
+<span id="cb10-186"><a href="#cb10-186" tabindex="-1"></a><span class="co">#   pl$fold(0, function(a, b) a + b, c( pl$col(&quot;A&quot;), &quot;B&quot;, pl$col(&quot;B&quot;)**2,))$alias(&quot;fold&quot;)</span></span>
+<span id="cb10-187"><a href="#cb10-187" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb10-188"><a href="#cb10-188" tabindex="-1"></a></span>
+<span id="cb10-189"><a href="#cb10-189" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">groupby</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span></span>
+<span id="cb10-190"><a href="#cb10-190" tabindex="-1"></a>  <span class="fu">agg</span>(</span>
+<span id="cb10-191"><a href="#cb10-191" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">count</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_count&quot;</span>),</span>
+<span id="cb10-192"><a href="#cb10-192" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_sum&quot;</span>)</span>
+<span id="cb10-193"><a href="#cb10-193" tabindex="-1"></a>  )</span>
+<span id="cb10-194"><a href="#cb10-194" tabindex="-1"></a><span class="co">#&gt; shape: (2, 3)</span></span>
+<span id="cb10-195"><a href="#cb10-195" tabindex="-1"></a><span class="co">#&gt; ┌────────┬─────────┬───────┐</span></span>
+<span id="cb10-196"><a href="#cb10-196" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ B_count ┆ B_sum │</span></span>
+<span id="cb10-197"><a href="#cb10-197" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---     ┆ ---   │</span></span>
+<span id="cb10-198"><a href="#cb10-198" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ u32     ┆ f64   │</span></span>
+<span id="cb10-199"><a href="#cb10-199" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═════════╪═══════╡</span></span>
+<span id="cb10-200"><a href="#cb10-200" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 2       ┆ 5.0   │</span></span>
+<span id="cb10-201"><a href="#cb10-201" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 3       ┆ 10.0  │</span></span>
+<span id="cb10-202"><a href="#cb10-202" tabindex="-1"></a><span class="co">#&gt; └────────┴─────────┴───────┘</span></span>
+<span id="cb10-203"><a href="#cb10-203" tabindex="-1"></a></span>
+<span id="cb10-204"><a href="#cb10-204" tabindex="-1"></a><span class="co"># We can aggregate many expressions at once</span></span>
+<span id="cb10-205"><a href="#cb10-205" tabindex="-1"></a>df<span class="sc">$</span><span class="fu">groupby</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span></span>
+<span id="cb10-206"><a href="#cb10-206" tabindex="-1"></a>  <span class="fu">agg</span>(</span>
+<span id="cb10-207"><a href="#cb10-207" tabindex="-1"></a>            pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_sum&quot;</span>),<span class="co"># Sum of B</span></span>
+<span id="cb10-208"><a href="#cb10-208" tabindex="-1"></a>            <span class="co"># pl$first(&quot;fruits&quot;)$alias(&quot;fruits_first&quot;),# First value of fruits</span></span>
+<span id="cb10-209"><a href="#cb10-209" tabindex="-1"></a>            <span class="co"># pl$count(&quot;A&quot;)$alias(&quot;count&quot;),# Count of A</span></span>
+<span id="cb10-210"><a href="#cb10-210" tabindex="-1"></a>            pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;cars&quot;</span>)<span class="sc">$</span><span class="fu">reverse</span>() <span class="co"># Reverse the cars column - not an aggregation</span></span>
+<span id="cb10-211"><a href="#cb10-211" tabindex="-1"></a>            <span class="co"># so the output is a pl$List</span></span>
+<span id="cb10-212"><a href="#cb10-212" tabindex="-1"></a>  )</span>
+<span id="cb10-213"><a href="#cb10-213" tabindex="-1"></a><span class="co">#&gt; shape: (2, 3)</span></span>
+<span id="cb10-214"><a href="#cb10-214" tabindex="-1"></a><span class="co">#&gt; ┌────────┬───────┬──────────────────────────────┐</span></span>
+<span id="cb10-215"><a href="#cb10-215" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ B_sum ┆ cars                         │</span></span>
+<span id="cb10-216"><a href="#cb10-216" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---   ┆ ---                          │</span></span>
+<span id="cb10-217"><a href="#cb10-217" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ f64   ┆ list[str]                    │</span></span>
+<span id="cb10-218"><a href="#cb10-218" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═══════╪══════════════════════════════╡</span></span>
+<span id="cb10-219"><a href="#cb10-219" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 5.0   ┆ [&quot;beetle&quot;, &quot;beetle&quot;]         │</span></span>
+<span id="cb10-220"><a href="#cb10-220" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 10.0  ┆ [&quot;beetle&quot;, &quot;audi&quot;, &quot;beetle&quot;] │</span></span>
+<span id="cb10-221"><a href="#cb10-221" tabindex="-1"></a><span class="co">#&gt; └────────┴───────┴──────────────────────────────┘</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># We can also get a list of the row indices for each group with `agg_groups()`</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">agg</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">agg_groups</span>()<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;group_row_indices&quot;</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; shape: (2, 2)</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; ┌────────┬───────────────────┐</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ group_row_indices │</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---               │</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ list[u32]         │</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═══════════════════╡</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ [0, 1, 4]         │</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ [2, 3]            │</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; └────────┴───────────────────┘</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co"># We can also do filter predicates in groupby</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co"># In this example we do not include values of B that are smaller than 1</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># in the sum</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>  <span class="fu">groupby</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>  <span class="fu">agg</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">filter</span>(pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>) <span class="sc">&gt;</span> <span class="dv">1</span>)<span class="sc">$</span><span class="fu">sum</span>())</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; shape: (2, 2)</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; ┌────────┬─────┐</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ B   │</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ --- │</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ f64 │</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═════╡</span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 9.0 │</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 5.0 │</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; └────────┴─────┘</span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="co"># Here we add a new column with the sum of B grouped by fruits</span></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>    <span class="st">&quot;fruits&quot;</span>,</span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>    <span class="st">&quot;cars&quot;</span>,</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>    <span class="st">&quot;B&quot;</span>,</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_sum_by_fruits&quot;</span>))</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="co">#&gt; shape: (5, 4)</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="co">#&gt; ┌────────┬────────┬─────┬─────────────────┐</span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ cars   ┆ B   ┆ B_sum_by_fruits │</span></span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---    ┆ --- ┆ ---             │</span></span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ str    ┆ f64 ┆ f64             │</span></span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="co">#&gt; ╞════════╪════════╪═════╪═════════════════╡</span></span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ beetle ┆ 5.0 ┆ 10.0            │</span></span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ audi   ┆ 4.0 ┆ 10.0            │</span></span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ beetle ┆ 3.0 ┆ 5.0             │</span></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ beetle ┆ 2.0 ┆ 5.0             │</span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ beetle ┆ 1.0 ┆ 10.0            │</span></span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a><span class="co">#&gt; └────────┴────────┴─────┴─────────────────┘</span></span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a></span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="co"># We can also use window functions to do groupby over multiple columns</span></span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a>    <span class="st">&quot;fruits&quot;</span>,</span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a>    <span class="st">&quot;cars&quot;</span>,</span>
+<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a>    <span class="st">&quot;B&quot;</span>,</span>
+<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_sum_by_fruits&quot;</span>),</span>
+<span id="cb11-59"><a href="#cb11-59" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">sum</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;cars&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;B_sum_by_cars&quot;</span>))</span>
+<span id="cb11-60"><a href="#cb11-60" tabindex="-1"></a><span class="co">#&gt; shape: (5, 5)</span></span>
+<span id="cb11-61"><a href="#cb11-61" tabindex="-1"></a><span class="co">#&gt; ┌────────┬────────┬─────┬─────────────────┬───────────────┐</span></span>
+<span id="cb11-62"><a href="#cb11-62" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ cars   ┆ B   ┆ B_sum_by_fruits ┆ B_sum_by_cars │</span></span>
+<span id="cb11-63"><a href="#cb11-63" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ ---    ┆ --- ┆ ---             ┆ ---           │</span></span>
+<span id="cb11-64"><a href="#cb11-64" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ str    ┆ f64 ┆ f64             ┆ f64           │</span></span>
+<span id="cb11-65"><a href="#cb11-65" tabindex="-1"></a><span class="co">#&gt; ╞════════╪════════╪═════╪═════════════════╪═══════════════╡</span></span>
+<span id="cb11-66"><a href="#cb11-66" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ beetle ┆ 5.0 ┆ 10.0            ┆ 11.0          │</span></span>
+<span id="cb11-67"><a href="#cb11-67" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ audi   ┆ 4.0 ┆ 10.0            ┆ 4.0           │</span></span>
+<span id="cb11-68"><a href="#cb11-68" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ beetle ┆ 3.0 ┆ 5.0             ┆ 11.0          │</span></span>
+<span id="cb11-69"><a href="#cb11-69" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ beetle ┆ 2.0 ┆ 5.0             ┆ 11.0          │</span></span>
+<span id="cb11-70"><a href="#cb11-70" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ beetle ┆ 1.0 ┆ 10.0            ┆ 11.0          │</span></span>
+<span id="cb11-71"><a href="#cb11-71" tabindex="-1"></a><span class="co">#&gt; └────────┴────────┴─────┴─────────────────┴───────────────┘</span></span>
+<span id="cb11-72"><a href="#cb11-72" tabindex="-1"></a></span>
+<span id="cb11-73"><a href="#cb11-73" tabindex="-1"></a><span class="co"># Here we use a window function to lag column B within &quot;fruits&quot;</span></span>
+<span id="cb11-74"><a href="#cb11-74" tabindex="-1"></a>df<span class="sc">$</span></span>
+<span id="cb11-75"><a href="#cb11-75" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb11-76"><a href="#cb11-76" tabindex="-1"></a>    <span class="st">&quot;fruits&quot;</span>,</span>
+<span id="cb11-77"><a href="#cb11-77" tabindex="-1"></a>    <span class="st">&quot;B&quot;</span>,</span>
+<span id="cb11-78"><a href="#cb11-78" tabindex="-1"></a>    pl<span class="sc">$</span><span class="fu">col</span>(<span class="st">&quot;B&quot;</span>)<span class="sc">$</span><span class="fu">shift</span>()<span class="sc">$</span><span class="fu">over</span>(<span class="st">&quot;fruits&quot;</span>)<span class="sc">$</span><span class="fu">alias</span>(<span class="st">&quot;lag_B_by_fruits&quot;</span>))</span>
+<span id="cb11-79"><a href="#cb11-79" tabindex="-1"></a><span class="co">#&gt; shape: (5, 3)</span></span>
+<span id="cb11-80"><a href="#cb11-80" tabindex="-1"></a><span class="co">#&gt; ┌────────┬─────┬─────────────────┐</span></span>
+<span id="cb11-81"><a href="#cb11-81" tabindex="-1"></a><span class="co">#&gt; │ fruits ┆ B   ┆ lag_B_by_fruits │</span></span>
+<span id="cb11-82"><a href="#cb11-82" tabindex="-1"></a><span class="co">#&gt; │ ---    ┆ --- ┆ ---             │</span></span>
+<span id="cb11-83"><a href="#cb11-83" tabindex="-1"></a><span class="co">#&gt; │ str    ┆ f64 ┆ f64             │</span></span>
+<span id="cb11-84"><a href="#cb11-84" tabindex="-1"></a><span class="co">#&gt; ╞════════╪═════╪═════════════════╡</span></span>
+<span id="cb11-85"><a href="#cb11-85" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 5.0 ┆ null            │</span></span>
+<span id="cb11-86"><a href="#cb11-86" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 4.0 ┆ 5.0             │</span></span>
+<span id="cb11-87"><a href="#cb11-87" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 3.0 ┆ null            │</span></span>
+<span id="cb11-88"><a href="#cb11-88" tabindex="-1"></a><span class="co">#&gt; │ apple  ┆ 2.0 ┆ 3.0             │</span></span>
+<span id="cb11-89"><a href="#cb11-89" tabindex="-1"></a><span class="co">#&gt; │ banana ┆ 1.0 ┆ 4.0             │</span></span>
+<span id="cb11-90"><a href="#cb11-90" tabindex="-1"></a><span class="co">#&gt; └────────┴─────┴─────────────────┘</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
